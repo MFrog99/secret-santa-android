@@ -1,0 +1,23 @@
+# Secrets and machine-specific paths
+local.properties
+*.jks
+*.keystore
+.env
+
+# Gradle / build
+.gradle/
+.kotlin/
+build/
+*.apk
+*.aab
+
+# IDE / OS
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+captures/
+
+# Supabase CLI state
+supabase/.temp/
+supabase/.branches/
