@@ -178,7 +178,7 @@ function renderAuth() {
   const pending = sessionStorage.getItem('pendingJoin');
   app.append(
     h('h1', {}, 'Добро пожаловать'),
-    pending && h('p', { className: 'notice' }, `Войдите или зарегистрируйтесь, чтобы попасть в комнату ${pending}.`),
+    pending ? h('p', { className: 'notice' }, `Войдите или зарегистрируйтесь, чтобы попасть в комнату ${pending}.`) : '',
     errors,
     form,
     h('p', { className: 'muted center' },
@@ -369,7 +369,8 @@ async function renderRoom(roomId) {
         const recipient = members.find((m) => m.user_id === mine.recipient_id);
         const showButton = h('button', {}, 'Показать мою цель');
         showButton.onclick = () => { targetShown = true; load(); };
-        resultCard.replaceChildren(
+        // Wrapped in h(): it flattens the arrays and drops the empty mySanta branch.
+        resultCard.replaceChildren(h('div', {},
           h('h2', {}, 'Вы дарите подарок'),
           targetShown
             ? [h('div', { className: 'target' }, nameOf(mine.recipient_id)),
@@ -377,7 +378,7 @@ async function renderRoom(roomId) {
                h('p', { className: 'wish' }, recipient?.wishlist || 'Пожелание пока не указано')]
             : [h('p', { className: 'muted' }, 'Убедитесь, что никто не смотрит на экран.'), showButton],
           mySanta && [h('h2', { style: 'margin-top:16px' }, 'Ваш Санта'), h('div', { className: 'target' }, nameOf(mySanta.santa_id))],
-        );
+        ));
       } else if (drawn) {
         resultCard.replaceChildren(h('p', { className: 'muted' }, 'Жеребьёвка проведена без вас.'));
       }
