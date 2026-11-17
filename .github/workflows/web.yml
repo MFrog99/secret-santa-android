@@ -1,0 +1,45 @@
+name: Web version
+
+# Publishes web/ to GitHub Pages (free for public repositories), so iPhone owners
+# can play in the same rooms through the browser.
+on:
+  push:
+    branches: [main]
+    paths: ['web/**', '.github/workflows/web.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Write server config
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          test -n "$SUPABASE_URL" -a -n "$SUPABASE_ANON_KEY" || { echo "Supabase secrets are missing"; exit 1; }
+          printf 'window.SANTA_CONFIG = %s;\n' \
+            "$(jq -n --arg url "$SUPABASE_URL" --arg key "$SUPABASE_ANON_KEY" '{SUPABASE_URL: $url, SUPABASE_ANON_KEY: $key}')" \
+            > web/config.js
+
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: web
+      - id: deployment
+        uses: actions/deploy-pages@v5

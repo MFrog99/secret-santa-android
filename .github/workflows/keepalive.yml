@@ -1,0 +1,36 @@
+name: Keep Supabase awake
+
+# Free Supabase projects pause after 7 days without activity, and the app then
+# shows "no connection". A daily query keeps the project running. If the ping
+# fails, the run fails and GitHub emails the repository owner.
+on:
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  actions: write
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Query the database
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          curl --fail-with-body --silent --show-error --retry 3 --retry-delay 20 --retry-all-errors \
+            -X POST "$SUPABASE_URL/rest/v1/rpc/keepalive" \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            -H "Content-Type: application/json" -d '{}'
+          echo "Supabase is awake"
+
+      # GitHub turns off scheduled workflows after 60 days without repository
+      # activity. Re-enabling through the API resets that timer without commits.
+      - name: Keep this schedule enabled
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X PUT "repos/${{ github.repository }}/actions/workflows/keepalive.yml/enable"

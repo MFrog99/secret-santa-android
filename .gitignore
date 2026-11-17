@@ -21,3 +21,6 @@ captures/
 # Supabase CLI state
 supabase/.temp/
 supabase/.branches/
+
+# Local web config (CI writes it from secrets)
+web/config.js

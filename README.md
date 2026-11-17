@@ -4,6 +4,18 @@ Android-приложение для жеребьёвки подарков: со�
 
 **[Скачать последний APK](https://github.com/MFrog99/secret-santa-android/releases/latest/download/app-release.apk)** (Android 8.0 и новее)
 
+**[Веб-версия для iPhone и компьютера](https://mfrog99.github.io/secret-santa-android/)**: те же аккаунты и комнаты, что в приложении. На iPhone её можно добавить на экран «Домой» через «Поделиться».
+
+## Веб-версия и работа сервера
+
+Сайт лежит в `web/`: статическая страница на supabase-js без сборки. Workflow `web.yml` публикует его на GitHub Pages и записывает `config.js` из тех же секретов, что и сборка APK. Для локального запуска создайте `web/config.js` (он в `.gitignore`):
+
+```js
+window.SANTA_CONFIG = { SUPABASE_URL: 'https://<project-ref>.supabase.co', SUPABASE_ANON_KEY: '<anon key>' };
+```
+
+Бесплатный проект Supabase засыпает после недели без активности. Workflow `keepalive.yml` раз в день вызывает функцию `keepalive()` в базе, чтобы этого не случилось. Если вызов не прошёл, запуск падает и GitHub присылает письмо владельцу репозитория. Тогда откройте панель Supabase и нажмите Restore.
+
 ## Возможности
 
 - Регистрация и вход по email и паролю, сессия сохраняется между запусками.
